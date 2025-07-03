@@ -3,14 +3,14 @@
     <h2>{{ title }}</h2>
     
     <form @submit.prevent="submitForm">
-      <!-- 用户名输入 -->
+      <!-- 手机号输入 -->
       <div class="form-group">
-        <label for="username">用户名</label>
+        <label for="phone">手机号</label>
         <input 
-          type="text" 
-          id="username" 
-          v-model="formData.username" 
-          placeholder="请输入用户名" 
+          type="tel" 
+          id="phone" 
+          v-model="formData.phone" 
+          placeholder="请输入手机号" 
           required
         />
       </div>
@@ -37,6 +37,28 @@
           placeholder="设置您的昵称" 
           required
         />
+      </div>
+      
+      <div v-if="mode === 'register'" class="form-group">
+        <label>性别</label>
+        <div class="gender-options">
+          <label>
+            <input 
+              type="radio" 
+              v-model="formData.sex" 
+              :value="1" 
+              required
+            /> 男
+          </label>
+          <label>
+            <input 
+              type="radio" 
+              v-model="formData.sex" 
+              :value="2" 
+              required
+            /> 女
+          </label>
+        </div>
       </div>
       
       <!-- 验证码 -->
@@ -106,9 +128,10 @@ const router = useRouter()
 
 // 表单数据
 const formData = ref({
-  username: '',
+  phone: '',
   password: '',
   nickname: '',
+  sex: 1, // 默认男性
   captcha: ''
 })
 
@@ -118,8 +141,6 @@ const loading = ref(false)
 const error = ref('')
 // 验证码图片
 const captchaImage = ref('')
-// 记住我
-const rememberMe = ref(false)
 
 // 根据模式设置标题
 const formTitle = computed(() => {
@@ -145,16 +166,17 @@ const submitForm = async () => {
   try {
     if (props.mode === 'login') {
       await authStore.login(
-        formData.value.username, 
+        formData.value.phone, 
         formData.value.password
       )
       // 登录成功后跳转到主界面
       router.push('/app')
     } else {
       await authStore.register({
-        username: formData.value.username,
+        phone: formData.value.phone,
         password: formData.value.password,
-        nickname: formData.value.nickname
+        nickname: formData.value.nickname,
+        sex: formData.value.sex
       })
       // 注册成功后跳转到登录页
       router.push({ name: 'Login', query: { registered: true } })
@@ -308,6 +330,18 @@ input:focus {
   text-decoration: none;
   margin-left: 5px;
   font-weight: 500;
+}
+
+.gender-options {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.gender-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .switch-link:hover {
