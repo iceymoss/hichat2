@@ -179,6 +179,7 @@ onUnmounted(() => {
   border: 1px solid rgba(229, 231, 235, 0.2);
   backdrop-filter: blur(20px);
   margin: 0; /* 去除所有边距 */
+  position: relative; /* 为绝对定位的按钮提供参考 */
 }
 
 .cover-background {
@@ -448,33 +449,43 @@ onUnmounted(() => {
 
 /* 返回顶部按钮 */
 .back-to-top-btn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: linear-gradient(135deg, #4a8cff, #8a69ff);
+  position: absolute;
+  top: 20px;
+  left: 20px; /* 移到用户卡片左上角 */
+  background: linear-gradient(135deg, rgba(74, 140, 255, 0.9), rgba(138, 105, 255, 0.9));
   color: white;
   border: none;
   border-radius: 50px;
-  padding: 12px 20px;
+  padding: 10px 16px;
   cursor: pointer;
   box-shadow: 
-    0 8px 24px rgba(74, 140, 255, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+    0 4px 16px rgba(74, 140, 255, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 100;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 600;
+  opacity: 0.95; /* 稍微透明，避免过于突出 */
 }
 
 .back-to-top-btn:hover {
-  transform: translateY(-4px) scale(1.05);
+  transform: translateY(-2px) scale(1.05);
+  background: linear-gradient(135deg, #4a8cff, #8a69ff);
+  opacity: 1; /* 悬浮时完全不透明 */
   box-shadow: 
-    0 12px 32px rgba(74, 140, 255, 0.4),
-    0 0 0 2px rgba(255, 255, 255, 0.2);
+    0 6px 20px rgba(74, 140, 255, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.back-to-top-btn:active {
+  transform: translateY(0) scale(1.02);
+  box-shadow: 
+    0 4px 12px rgba(74, 140, 255, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .back-to-top-btn .icon {
@@ -522,9 +533,11 @@ onUnmounted(() => {
 
   
   .back-to-top-btn {
-    bottom: 16px;
-    right: 16px;
-    padding: 10px 16px;
+    top: 16px;
+    left: 16px; /* 移动端保持在左上角 */
+    padding: 8px 12px;
+    font-size: 11px;
+    gap: 4px;
   }
 }
 </style> 
