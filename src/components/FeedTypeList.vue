@@ -35,9 +35,18 @@
         @click="selectFeed(feed)"
       >
         <div class="feed-header">
-          <img :src="feed.user.avatar" class="avatar" />
+          <img 
+            :src="feed.user.avatar" 
+            class="avatar" 
+            @mouseenter="(e) => showUserProfile(feed.user, e)"
+            @mouseleave="hideUserProfile"
+          />
           <div class="user-info">
-            <div class="name">{{ feed.user.name }}</div>
+            <div 
+              class="name"
+              @mouseenter="(e) => showUserProfile(feed.user, e)"
+              @mouseleave="hideUserProfile"
+            >{{ feed.user.name }}</div>
             <div class="time">{{ feed.time }}</div>
           </div>
         </div>
@@ -74,12 +83,18 @@
                 :src="`https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}`"
                 :alt="user"
                 class="like-avatar"
+                @mouseenter="(e) => showUserProfile({ name: user, avatar: `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}` }, e)"
+                @mouseleave="hideUserProfile"
               />
               <span v-if="feed.likes.length > 15" class="like-more">+{{ feed.likes.length - 15 }}</span>
             </div>
             <div class="likes-text">
               <span v-for="(user, index) in feed.likes.slice(0, 15)" :key="user" class="like-user">
-                <span class="like-user-highlight">{{ user }}</span>{{ index < Math.min(14, feed.likes.length - 1) ? '、' : '' }}
+                <span 
+                  class="like-user-highlight"
+                  @mouseenter="(e) => showUserProfile({ name: user, avatar: `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}` }, e)"
+                  @mouseleave="hideUserProfile"
+                >{{ user }}</span>{{ index < Math.min(14, feed.likes.length - 1) ? '、' : '' }}
               </span>
               <span v-if="feed.likes.length > 15">等{{ feed.likes.length }}人觉得很赞</span>
               <span v-else>觉得很赞</span>
@@ -120,6 +135,8 @@
           <CommentThread 
             :comments="feed.comments"
             :format-comment="formatComment"
+            :show-user-profile="showUserProfile"
+            :hide-user-profile="hideUserProfile"
             @reply="(data) => handleCommentReply(feed, data)"
             @like-comment="(comment) => handleCommentLike(feed, comment)"
             @like-reply="(reply) => handleReplyLike(feed, reply)"
@@ -181,7 +198,12 @@
             :style="{ animationDelay: `${index * 0.1}s` }"
           >
             <div class="notification-avatar">
-              <img :src="notification.avatar" :alt="notification.user" />
+              <img 
+                :src="notification.avatar" 
+                :alt="notification.user"
+                @mouseenter="(e) => showUserProfile({ name: notification.user, avatar: notification.avatar }, e)"
+                @mouseleave="hideUserProfile"
+              />
               <div class="notification-type-badge" :class="notification.type">
                 <i class="icon" :class="getTypeIcon(notification.type)"></i>
               </div>
@@ -189,7 +211,11 @@
             
             <div class="notification-content">
               <div class="notification-text">
-                <span class="notification-user">{{ notification.user }}</span>
+                <span 
+                  class="notification-user"
+                  @mouseenter="(e) => showUserProfile({ name: notification.user, avatar: notification.avatar }, e)"
+                  @mouseleave="hideUserProfile"
+                >{{ notification.user }}</span>
                 <span class="notification-action">{{ notification.action }}</span>
                 <span class="notification-target">{{ notification.target }}</span>
               </div>
@@ -224,6 +250,19 @@
     :initial-index="viewerInitialIndex"
     @close="closeImageViewer"
   />
+  
+  <!-- 用户资料卡片 -->
+  <UserProfileCard
+    :visible="profileCard.visible"
+    :user="profileCard.user"
+    :position="profileCard.position"
+    :arrow-position="profileCard.arrowPosition"
+    @close="closeProfileCard"
+    @view-profile="handleViewProfile"
+    @view-space="handleViewSpace"
+    @mouse-enter-card="handleMouseEnterCard"
+    @mouse-leave-card="handleMouseLeaveCard"
+  />
 </template>
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
@@ -234,6 +273,7 @@ import CommentThread from './CommentThread.vue'
 import UserProfileHeader from './UserProfileHeader.vue'
 import CreatePostModal from './CreatePostModal.vue'
 import ImageViewer from './ImageViewer.vue'
+import UserProfileCard from './UserProfileCard.vue'
 
 const props = defineProps({ feeds: Array })
 const emit = defineEmits(['select', 'like', 'comment'])
@@ -259,6 +299,16 @@ const viewerInitialIndex = ref(0)
 const activeCommentFeed = ref(null)
 const commentText = ref('')
 const commentInput = ref(null)
+
+// 用户资料卡片状态
+const profileCard = ref({
+  visible: false,
+  user: null,
+  position: { x: 0, y: 0 },
+  arrowPosition: 'top'
+})
+
+let hoverTimeout = null
 
 // 内容标签页状态
 const activeContentTab = ref('all')
@@ -707,6 +757,68 @@ function getTypeIcon(type) {
   }
   return icons[type] || 'icon-bell'
 }
+
+// 用户资料卡片相关函数
+function showUserProfile(user, event) {
+  clearTimeout(hoverTimeout)
+  
+  // 计算位置
+  const rect = event.target.getBoundingClientRect()
+  const x = rect.left + rect.width / 2
+  const y = rect.bottom + window.scrollY
+  
+  // 检查是否靠近页面底部
+  const windowHeight = window.innerHeight
+  const cardHeight = 400 // 估算卡片高度
+  const arrowPosition = rect.bottom + cardHeight > windowHeight ? 'bottom' : 'top'
+  
+  // 构建用户资料数据
+  const profileUser = {
+    ...user,
+    description: user.description || '这个人很懒，什么都没写...',
+    isOnline: Math.random() > 0.5, // 随机在线状态
+    feedCount: Math.floor(Math.random() * 100) + 10,
+    friendCount: Math.floor(Math.random() * 500) + 50,
+    likeCount: Math.floor(Math.random() * 1000) + 100
+  }
+  
+  profileCard.value = {
+    visible: true,
+    user: profileUser,
+    position: { x, y },
+    arrowPosition
+  }
+}
+
+function hideUserProfile() {
+  hoverTimeout = setTimeout(() => {
+    profileCard.value.visible = false
+  }, 300)
+}
+
+function handleMouseEnterCard() {
+  // 清除关闭定时器
+  clearTimeout(hoverTimeout)
+}
+
+function handleMouseLeaveCard() {
+  // 延迟关闭卡片
+  hoverTimeout = setTimeout(() => {
+    profileCard.value.visible = false
+  }, 300)
+}
+
+function handleViewProfile(user) {
+  router.push(`/profile/${user.id || user.name}`)
+}
+
+function handleViewSpace(user) {
+  router.push(`/space/${user.id || user.name}`)
+}
+
+function closeProfileCard() {
+  profileCard.value.visible = false
+}
 </script>
 <style scoped>
 .feed-type-list-main {
@@ -776,11 +888,30 @@ function getTypeIcon(type) {
   margin-right: 14px;
   border: 2px solid rgba(255,255,255,0.9);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(74, 140, 255, 0.3);
+  border-color: rgba(74, 140, 255, 0.5);
 }
 .user-info .name {
   color: #0f172a;
   font-size: 16px;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.user-info .name:hover {
+  color: #4a8cff;
+  background: rgba(74, 140, 255, 0.1);
+  transform: scale(1.02);
 }
 .user-info .time {
   color: #475569;
@@ -937,10 +1068,30 @@ function getTypeIcon(type) {
   flex-shrink: 0;
   margin-right: -6px;
   z-index: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.like-avatar:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(74, 140, 255, 0.3);
+  border-color: rgba(74, 140, 255, 0.5);
+  z-index: 10;
 }
 .like-user-highlight {
   color: #2563eb;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: -2px -4px;
+}
+
+.like-user-highlight:hover {
+  color: #8a69ff;
+  background: rgba(138, 105, 255, 0.1);
+  transform: scale(1.05);
 }
 .like-more {
   color: #2563eb;
@@ -1840,6 +1991,14 @@ function getTypeIcon(type) {
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.8);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.notification-avatar img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(74, 140, 255, 0.3);
+  border-color: rgba(74, 140, 255, 0.5);
 }
 
 .notification-type-badge {
@@ -1884,6 +2043,17 @@ function getTypeIcon(type) {
 .notification-user {
   font-weight: 700;
   color: #1e293b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: -2px -4px;
+}
+
+.notification-user:hover {
+  color: #4a8cff;
+  background: rgba(74, 140, 255, 0.1);
+  transform: scale(1.05);
 }
 
 .notification-action {
@@ -2083,6 +2253,10 @@ function getTypeIcon(type) {
   .notification-avatar img {
     width: 40px;
     height: 40px;
+  }
+  
+  .notification-avatar img:hover {
+    transform: scale(1.15);
   }
   
   .notification-type-badge {

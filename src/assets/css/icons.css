@@ -149,6 +149,12 @@
   font-size: 16px;
 }
 
+/* 用户图标 */
+.icon-user::before {
+  content: "👤";
+  font-size: 16px;
+}
+
 /* 左箭头图标 */
 .icon-chevron-left::before {
   content: "‹";

@@ -9,9 +9,18 @@
           <span class="back-btn-text">返回动态列表</span>
           <div class="back-btn-ripple"></div>
         </button>
-        <img :src="selectedReactive.user.avatar" class="avatar" />
+        <img 
+          :src="selectedReactive.user.avatar" 
+          class="avatar" 
+          @mouseenter="(e) => showUserProfile(selectedReactive.user, e)"
+          @mouseleave="hideUserProfile"
+        />
         <div class="user-info">
-          <div class="name">{{ selectedReactive.user.name }}</div>
+          <div 
+            class="name"
+            @mouseenter="(e) => showUserProfile(selectedReactive.user, e)"
+            @mouseleave="hideUserProfile"
+          >{{ selectedReactive.user.name }}</div>
           <div class="time">{{ selectedReactive.time }}</div>
         </div>
       </div>
@@ -65,12 +74,18 @@
             :src="`https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}`"
             :alt="user"
             class="like-avatar"
+            @mouseenter="(e) => showUserProfile({ name: user, avatar: `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}` }, e)"
+            @mouseleave="hideUserProfile"
           />
           <span v-if="selectedReactive.likes.length > 15" class="more-likes">+{{ selectedReactive.likes.length - 15 }}</span>
         </div>
         <div class="likes-text">
           <span v-for="(user, index) in Array.from(new Set(selectedReactive.likes)).slice(0, 15)" :key="user" class="like-user">
-            {{ user }}{{ index < Math.min(14, selectedReactive.likes.length - 1) ? '、' : '' }}
+            <span 
+              class="like-user-name"
+              @mouseenter="(e) => showUserProfile({ name: user, avatar: `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}` }, e)"
+              @mouseleave="hideUserProfile"
+            >{{ user }}</span>{{ index < Math.min(14, selectedReactive.likes.length - 1) ? '、' : '' }}
           </span>
           <span v-if="selectedReactive.likes.length > 15">等{{ selectedReactive.likes.length }}位好友点赞</span>
         </div>
@@ -100,6 +115,8 @@
         <CommentThread 
           :comments="selectedReactive.comments"
           :format-comment="formatComment"
+          :show-user-profile="showUserProfile"
+          :hide-user-profile="hideUserProfile"
           @reply="handleCommentReply"
           @like-comment="handleCommentLike"
           @like-reply="handleReplyLike"
@@ -117,6 +134,19 @@
       :initial-index="viewerInitialIndex"
       @close="closeImageViewer"
     />
+    
+    <!-- 用户资料卡片 -->
+    <UserProfileCard
+      :visible="profileCard.visible"
+      :user="profileCard.user"
+      :position="profileCard.position"
+      :arrow-position="profileCard.arrowPosition"
+      @close="closeProfileCard"
+      @view-profile="handleViewProfile"
+      @view-space="handleViewSpace"
+      @mouse-enter-card="handleMouseEnterCard"
+      @mouse-leave-card="handleMouseLeaveCard"
+    />
   </div>
 </template>
 
@@ -124,14 +154,17 @@
 import { ref, computed, nextTick } from 'vue'
 import CommentThread from './CommentThread.vue'
 import ImageViewer from './ImageViewer.vue'
+import UserProfileCard from './UserProfileCard.vue'
 import { useFeedStore } from '../stores/feed'
 import { useAuthStore } from '../stores/auth'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({ selected: Object })
 const emit = defineEmits(['back', 'like', 'comment'])
 
 const feedStore = useFeedStore()
 const authStore = useAuthStore()
+const router = useRouter()
 const selectedReactive = computed(() => {
   if (!props.selected) return null
   const allFeeds = [...feedStore.getFriendFeeds, ...feedStore.getCommunityFeeds]
@@ -146,6 +179,16 @@ const newComment = ref('')
 const showImageViewer = ref(false)
 const viewerImages = ref([])
 const viewerInitialIndex = ref(0)
+
+// 用户资料卡片状态
+const profileCard = ref({
+  visible: false,
+  user: null,
+  position: { x: 0, y: 0 },
+  arrowPosition: 'top'
+})
+
+let hoverTimeout = null
 
 function handleDeleteComment(comment) {
   if (!selectedReactive.value) return
@@ -255,6 +298,68 @@ function getImageGridClass(count) {
   if (count === 3) return 'grid-triple'
   if (count === 4) return 'grid-quad'
   return 'grid-multi'
+}
+
+// 用户资料卡片相关函数
+function showUserProfile(user, event) {
+  clearTimeout(hoverTimeout)
+  
+  // 计算位置
+  const rect = event.target.getBoundingClientRect()
+  const x = rect.left + rect.width / 2
+  const y = rect.bottom + window.scrollY
+  
+  // 检查是否靠近页面底部
+  const windowHeight = window.innerHeight
+  const cardHeight = 400 // 估算卡片高度
+  const arrowPosition = rect.bottom + cardHeight > windowHeight ? 'bottom' : 'top'
+  
+  // 构建用户资料数据
+  const profileUser = {
+    ...user,
+    description: user.description || '这个人很懒，什么都没写...',
+    isOnline: Math.random() > 0.5, // 随机在线状态
+    feedCount: Math.floor(Math.random() * 100) + 10,
+    friendCount: Math.floor(Math.random() * 500) + 50,
+    likeCount: Math.floor(Math.random() * 1000) + 100
+  }
+  
+  profileCard.value = {
+    visible: true,
+    user: profileUser,
+    position: { x, y },
+    arrowPosition
+  }
+}
+
+function hideUserProfile() {
+  hoverTimeout = setTimeout(() => {
+    profileCard.value.visible = false
+  }, 300)
+}
+
+function handleMouseEnterCard() {
+  // 清除关闭定时器
+  clearTimeout(hoverTimeout)
+}
+
+function handleMouseLeaveCard() {
+  // 延迟关闭卡片
+  hoverTimeout = setTimeout(() => {
+    profileCard.value.visible = false
+  }, 300)
+}
+
+function handleViewProfile(user) {
+  router.push(`/profile/${user.id || user.name}`)
+}
+
+function handleViewSpace(user) {
+  router.push(`/space/${user.id || user.name}`)
+}
+
+function closeProfileCard() {
+  profileCard.value.visible = false
 }
 
 
@@ -428,6 +533,7 @@ function getImageGridClass(count) {
     0 4px 12px rgba(0,0,0,0.08),
     0 0 0 1px rgba(74, 140, 255, 0.1);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .avatar:hover {
@@ -450,6 +556,20 @@ function getImageGridClass(count) {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin: -4px -6px 2px -6px;
+}
+
+.user-info .name:hover {
+  background: linear-gradient(135deg, #4a8cff 0%, #8a69ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(74, 140, 255, 0.2);
 }
 
 .user-info .time {
@@ -604,6 +724,15 @@ function getImageGridClass(count) {
   height: 32px;
   border-radius: 50%;
   border: 2px solid #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.like-avatar:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 16px rgba(74, 140, 255, 0.3);
+  border-color: rgba(74, 140, 255, 0.5);
 }
 .more-likes {
   color: #64748b;
@@ -617,6 +746,22 @@ function getImageGridClass(count) {
 .like-user {
   font-weight: 600;
   color: #1f2937;
+}
+
+.like-user-name {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: -2px -4px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.like-user-name:hover {
+  color: #8a69ff;
+  background: rgba(138, 105, 255, 0.1);
+  transform: scale(1.05);
 }
 .feed-detail-actions {
   display: flex;

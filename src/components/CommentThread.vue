@@ -1,10 +1,20 @@
 <template>
   <div class="comment-thread" @click.stop>
     <div v-for="comment in getDisplayComments()" :key="comment.id" class="comment-item">
-      <img :src="getUserAvatar(comment.user)" alt="头像" class="comment-avatar">
+      <img 
+        :src="getUserAvatar(comment.user)" 
+        alt="头像" 
+        class="comment-avatar"
+        @mouseenter="(e) => showUserProfile(comment.user, e)"
+        @mouseleave="hideUserProfile"
+      >
       <div class="comment-content-wrapper">
         <div class="comment-main-row">
-          <span class="comment-user">{{ comment.user }}</span>
+          <span 
+            class="comment-user"
+            @mouseenter="(e) => showUserProfile(comment.user, e)"
+            @mouseleave="hideUserProfile"
+          >{{ comment.user }}</span>
           <span class="comment-time">{{ comment.time || '刚刚' }}</span>
         </div>
         <div class="comment-text" v-html="formatComment(comment.content)"></div>
@@ -17,10 +27,20 @@
         </div>
         <div class="comment-replies" v-if="comment.replies && comment.replies.length">
           <div v-for="reply in getDisplayReplies(comment)" :key="reply.id" class="reply-item">
-            <img :src="getUserAvatar(reply.user)" alt="头像" class="reply-avatar-small">
+            <img 
+              :src="getUserAvatar(reply.user)" 
+              alt="头像" 
+              class="reply-avatar-small"
+              @mouseenter="(e) => showUserProfile(reply.user, e)"
+              @mouseleave="hideUserProfile"
+            >
             <div class="reply-content-wrapper">
               <div class="reply-main-row">
-                <span class="reply-user">{{ reply.user }}</span>
+                <span 
+                  class="reply-user"
+                  @mouseenter="(e) => showUserProfile(reply.user, e)"
+                  @mouseleave="hideUserProfile"
+                >{{ reply.user }}</span>
                 <span class="reply-time">{{ reply.time || '刚刚' }}</span>
               </div>
               <div class="reply-text" v-html="formatComment(reply.content)"></div>
@@ -71,7 +91,9 @@ import { useAuthStore } from '../stores/auth'
 
 const props = defineProps({ 
   comments: Array, 
-  formatComment: Function 
+  formatComment: Function,
+  showUserProfile: Function,
+  hideUserProfile: Function
 })
 const emit = defineEmits(['reply', 'like-comment', 'like-reply', 'delete-comment', 'delete-reply'])
 
@@ -131,6 +153,23 @@ function getUserAvatar(userName) {
 
 function formatComment(content) {
   return format.value(content)
+}
+
+function showUserProfile(userName, event) {
+  if (props.showUserProfile) {
+    // 构建用户对象
+    const user = {
+      name: userName,
+      avatar: getUserAvatar(userName)
+    }
+    props.showUserProfile(user, event)
+  }
+}
+
+function hideUserProfile() {
+  if (props.hideUserProfile) {
+    props.hideUserProfile()
+  }
 }
 
 function startReply(comment, reply = null) {
@@ -211,6 +250,14 @@ function confirmDelete(commentOrReply, type, parentComment = null) {
   flex-shrink: 0;
   box-shadow: none;
   align-self: flex-start;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.comment-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(74, 140, 255, 0.3);
+  border: 2px solid rgba(74, 140, 255, 0.5);
 }
 .comment-content-wrapper {
   flex: 1;
@@ -229,6 +276,17 @@ function confirmDelete(commentOrReply, type, parentComment = null) {
   font-weight: 600;
   font-size: 14px;
   margin-right: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: -2px 2px -2px -4px;
+}
+
+.comment-user:hover {
+  color: #4a8cff;
+  background: rgba(74, 140, 255, 0.1);
+  transform: scale(1.05);
 }
 .comment-text {
   color: #333;
@@ -304,6 +362,14 @@ function confirmDelete(commentOrReply, type, parentComment = null) {
   margin: 2px 8px 0 0;
   flex-shrink: 0;
   box-shadow: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reply-avatar-small:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(74, 140, 255, 0.3);
+  border: 2px solid rgba(74, 140, 255, 0.5);
 }
 .reply-content-wrapper {
   flex: 1;
@@ -322,6 +388,17 @@ function confirmDelete(commentOrReply, type, parentComment = null) {
   font-weight: 600;
   font-size: 13px;
   margin-right: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: -2px 2px -2px -4px;
+}
+
+.reply-user:hover {
+  color: #8a69ff;
+  background: rgba(138, 105, 255, 0.1);
+  transform: scale(1.05);
 }
 .reply-text {
   color: #444;
