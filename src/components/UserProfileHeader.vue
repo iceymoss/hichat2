@@ -36,7 +36,7 @@
       
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <button class="action-btn primary" @click="$emit('create-post')">
+        <button class="action-btn primary" @click="handleCreatePostClick">
           <i class="icon icon-plus"></i>
           <span>发动态</span>
         </button>
@@ -147,6 +147,10 @@ function handleScroll() {
 
 function switchTab(tabKey) {
   emit('switch-tab', tabKey)
+}
+
+function handleCreatePostClick() {
+  emit('create-post')
 }
 
 
@@ -329,6 +333,7 @@ onUnmounted(() => {
   right: 24px;
   display: flex;
   gap: 12px;
+  z-index: 10; /* 确保按钮在其他元素之上 */
 }
 
 .action-btn {
@@ -343,6 +348,9 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 5; /* 确保按钮本身可以被点击 */
+  pointer-events: auto; /* 确保指针事件正常工作 */
 }
 
 .action-btn.primary {

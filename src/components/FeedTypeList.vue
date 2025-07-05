@@ -43,8 +43,25 @@
         </div>
         <div class="feed-content" @click="selectFeed(feed)">
           <div class="feed-text">{{ feed.content }}</div>
-          <div class="feed-image" v-if="feed.image">
-            <img :src="feed.image" alt="动态图片" />
+          <!-- 兼容旧的单图片格式 -->
+          <div class="feed-image" v-if="feed.image && (!feed.images || feed.images.length === 0)">
+            <img :src="feed.image" alt="动态图片" @click.stop="viewImage(feed, 0)" />
+          </div>
+          <!-- 新的多图片格式 -->
+          <div class="feed-images" v-if="feed.images && feed.images.length > 0">
+            <div :class="['images-grid', getImageGridClass(feed.images.length)]">
+              <div
+                v-for="(image, index) in feed.images.slice(0, 9)"
+                :key="index"
+                class="image-item"
+                @click.stop="viewImage(feed, index)"
+              >
+                <img :src="image" alt="动态图片" class="feed-image-item">
+                <div v-if="feed.images.length > 9 && index === 8" class="more-images-count">
+                  +{{ feed.images.length - 9 }}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -192,6 +209,21 @@
       </div>
     </div>
   </Transition>
+
+  <!-- 发布动态弹窗 -->
+  <CreatePostModal
+    :visible="showCreatePostModal"
+    @close="closeCreatePostModal"
+    @published="handlePostPublished"
+  />
+
+  <!-- 图片查看器 -->
+  <ImageViewer
+    :visible="showImageViewer"
+    :images="viewerImages"
+    :initial-index="viewerInitialIndex"
+    @close="closeImageViewer"
+  />
 </template>
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
@@ -200,6 +232,8 @@ import { useAuthStore } from '../stores/auth'
 import { useFeedStore } from '../stores/feed'
 import CommentThread from './CommentThread.vue'
 import UserProfileHeader from './UserProfileHeader.vue'
+import CreatePostModal from './CreatePostModal.vue'
+import ImageViewer from './ImageViewer.vue'
 
 const props = defineProps({ feeds: Array })
 const emit = defineEmits(['select', 'like', 'comment'])
@@ -217,6 +251,10 @@ const unreadCount = ref(10)
 const hasUnreadNotifications = computed(() => unreadCount.value > 0)
 const isNotificationSticky = ref(false)
 const showMessageOverlay = ref(false)
+const showCreatePostModal = ref(false)
+const showImageViewer = ref(false)
+const viewerImages = ref([])
+const viewerInitialIndex = ref(0)
 
 const activeCommentFeed = ref(null)
 const commentText = ref('')
@@ -298,12 +336,22 @@ onBeforeUnmount(() => {
     container.removeEventListener('scroll', handleScroll)
   }
 })
-watch(() => props.feeds, () => {
-  // 修复：切换类型时重置所有状态
-  feedPage.value = 1
-  noMore.value = false
-  displayFeeds.value = []
-  loadFeeds()
+watch(() => props.feeds, (newFeeds, oldFeeds) => {
+  // 检查是否是新动态添加（第一个动态发生变化）
+  const isNewPost = newFeeds && oldFeeds && newFeeds.length > oldFeeds.length && 
+                   newFeeds[0]?.id !== oldFeeds[0]?.id
+  
+  if (isNewPost) {
+    // 新动态添加，保持当前页面位置，只更新显示的动态
+    const currentDisplayCount = displayFeeds.value.length
+    displayFeeds.value = newFeeds.slice(0, Math.max(currentDisplayCount, feedPageSize))
+  } else {
+    // 切换类型或其他情况，重置所有状态
+    feedPage.value = 1
+    noMore.value = false
+    displayFeeds.value = []
+    loadFeeds()
+  }
 }, { immediate: true })
 
 // 监听消息通知状态变化，更新布局
@@ -386,8 +434,60 @@ function deleteReply(feed, comment, reply) {
 
 // 用户个人信息头部事件处理
 function handleCreatePost() {
-  // TODO: 打开发动态对话框
-  console.log('创建新动态')
+  showCreatePostModal.value = true
+}
+
+// 关闭发布动态弹窗
+function closeCreatePostModal() {
+  showCreatePostModal.value = false
+}
+
+// 处理发布动态成功
+function handlePostPublished(newPost) {
+  // 重新加载feeds以确保新动态显示
+  feedPage.value = 1
+  noMore.value = false
+  loadFeeds()
+  
+  // 滚动到顶部查看新动态
+  handleBackToTop()
+}
+
+// 获取图片网格布局类名
+function getImageGridClass(count) {
+  if (count === 1) return 'grid-single'
+  if (count === 2) return 'grid-double'
+  if (count === 3) return 'grid-triple'
+  if (count === 4) return 'grid-quad'
+  return 'grid-multi'
+}
+
+// 查看图片
+function viewImage(feed, index) {
+  // 收集当前动态的所有图片
+  const images = []
+  
+  // 如果有新的多图片格式
+  if (feed.images && feed.images.length > 0) {
+    images.push(...feed.images)
+  } 
+  // 如果只有旧的单图片格式
+  else if (feed.image) {
+    images.push(feed.image)
+  }
+  
+  if (images.length > 0) {
+    viewerImages.value = images
+    viewerInitialIndex.value = Math.max(0, Math.min(index, images.length - 1))
+    showImageViewer.value = true
+  }
+}
+
+// 关闭图片查看器
+function closeImageViewer() {
+  showImageViewer.value = false
+  viewerImages.value = []
+  viewerInitialIndex.value = 0
 }
 
 function handleEditProfile() {
@@ -713,6 +813,97 @@ function getTypeIcon(type) {
   border-radius: 8px;
   object-fit: cover;
   border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.feed-image img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #cbd5e1;
+}
+
+/* 多图片网格布局 */
+.feed-images {
+  margin-top: 12px;
+}
+
+.images-grid {
+  display: grid;
+  gap: 4px;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.images-grid.grid-single {
+  grid-template-columns: 1fr;
+  max-width: 400px;
+}
+
+.images-grid.grid-double {
+  grid-template-columns: 1fr 1fr;
+  max-width: 400px;
+}
+
+.images-grid.grid-triple {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  max-width: 400px;
+}
+
+.images-grid.grid-triple .image-item:first-child {
+  grid-row: 1 / 3;
+}
+
+.images-grid.grid-quad {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  max-width: 400px;
+}
+
+.images-grid.grid-multi {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 400px;
+}
+
+.image-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f8fafc;
+}
+
+.image-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feed-image-item {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.image-item:hover .feed-image-item {
+  transform: scale(1.05);
+}
+
+.more-images-count {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  backdrop-filter: blur(2px);
 }
 .feed-likes {
   margin-bottom: 8px;
