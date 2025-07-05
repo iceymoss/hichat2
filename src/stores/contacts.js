@@ -39,6 +39,96 @@ export const useContactsStore = defineStore('contacts', () => {
       status: 'offline',
       tags: ['设计'],
       lastActive: '2天前'
+    },
+    {
+      id: 101,
+      name: '小明',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Ming',
+      remark: '后端开发',
+      tags: ['Go', '后端'],
+      status: 'online',
+      lastActive: '1分钟前'
+    },
+    {
+      id: 102,
+      name: '小红',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Hong',
+      remark: '产品经理',
+      tags: ['产品'],
+      status: 'away',
+      lastActive: '5分钟前'
+    },
+    {
+      id: 103,
+      name: '小刚',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Gang',
+      remark: '测试工程师',
+      tags: ['测试'],
+      status: 'offline',
+      lastActive: '10分钟前'
+    },
+    {
+      id: 104,
+      name: '小美',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Mei',
+      remark: 'UI设计',
+      tags: ['设计'],
+      status: 'online',
+      lastActive: '2分钟前'
+    },
+    {
+      id: 105,
+      name: '小强',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Qiang',
+      remark: '前端开发',
+      tags: ['Vue', '前端'],
+      status: 'away',
+      lastActive: '8分钟前'
+    },
+    {
+      id: 106,
+      name: '小芳',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Fang',
+      remark: '运营',
+      tags: ['运营'],
+      status: 'offline',
+      lastActive: '20分钟前'
+    },
+    {
+      id: 107,
+      name: '小军',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Jun',
+      remark: '后端开发',
+      tags: ['Go'],
+      status: 'online',
+      lastActive: '3分钟前'
+    },
+    {
+      id: 108,
+      name: '小雪',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Xue',
+      remark: '产品助理',
+      tags: ['产品'],
+      status: 'away',
+      lastActive: '12分钟前'
+    },
+    {
+      id: 109,
+      name: '小林',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Lin',
+      remark: '测试',
+      tags: ['测试'],
+      status: 'offline',
+      lastActive: '30分钟前'
+    },
+    {
+      id: 110,
+      name: '小天',
+      avatar: 'https://api.dicebear.com/7.x/personas/svg?seed=Tian',
+      remark: '前端开发',
+      tags: ['Vue'],
+      status: 'online',
+      lastActive: '刚刚'
     }
   ])
   

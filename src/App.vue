@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="main-bg">
     <router-view />
     <div v-if="globalLoading" class="global-loading">
       <div class="loading-spinner"></div>
@@ -34,8 +34,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-#app {
+#app.main-bg {
   min-height: 100vh;
+  background: var(--primary-gradient);
 }
 
 .global-loading {

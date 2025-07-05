@@ -41,8 +41,8 @@ defineProps({
 .app-sidebar {
   width: 300px;
   height: 100%;
-  background-color: #1e2329;
-  color: #ccc;
+  background: linear-gradient(135deg, #4a8cffcc, #8a69ffcc);
+  color: #fff;
   display: flex;
   flex-direction: column;
   overflow: hidden;
