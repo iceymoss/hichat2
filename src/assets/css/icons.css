@@ -37,4 +37,155 @@
   font-size: 16px;
 }
 
+/* 添加/发布图标 */
+.icon-plus::before {
+  content: "➕";
+  font-size: 16px;
+}
+
+/* 编辑图标 */
+.icon-edit::before {
+  content: "✏️";
+  font-size: 16px;
+}
+
+/* 网格图标 */
+.icon-grid::before {
+  content: "⚏";
+  font-size: 16px;
+}
+
+/* 图片图标 */
+.icon-image::before {
+  content: "🖼️";
+  font-size: 16px;
+}
+
+/* 视频图标 */
+.icon-video::before {
+  content: "🎥";
+  font-size: 16px;
+}
+
+/* 文档图标 */
+.icon-document::before {
+  content: "📄";
+  font-size: 16px;
+}
+
+/* 向上箭头图标 */
+.icon-arrow-up::before {
+  content: "↑";
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 向右箭头图标 */
+.icon-chevron-right::before {
+  content: "›";
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 铃铛图标 */
+.icon-bell::before {
+  content: "🔔";
+  font-size: 16px;
+}
+
+/* 铃铛关闭图标 */
+.icon-bell-off::before {
+  content: "🔕";
+  font-size: 16px;
+}
+
+/* 垃圾桶图标 */
+.icon-trash::before {
+  content: "🗑️";
+  font-size: 16px;
+}
+
+/* 关闭图标 */
+.icon-x::before {
+  content: "✕";
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 上传图标 */
+.icon-upload::before {
+  content: "📤";
+  font-size: 16px;
+}
+
+/* 位置图标 */
+.icon-location::before {
+  content: "📍";
+  font-size: 16px;
+}
+
+/* 话题图标 */
+.icon-hash::before {
+  content: "#";
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 发送图标 */
+.icon-send::before {
+  content: "🚀";
+  font-size: 16px;
+}
+
+/* 地图图标 */
+.icon-map-pin::before {
+  content: "📍";
+  font-size: 16px;
+}
+
+/* 全球图标 */
+.icon-globe::before {
+  content: "🌍";
+  font-size: 16px;
+}
+
+/* 用户图标 */
+.icon-user::before {
+  content: "👤";
+  font-size: 16px;
+}
+
+/* 左箭头图标 */
+.icon-chevron-left::before {
+  content: "‹";
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 放大图标 */
+.icon-zoom-in::before {
+  content: "🔍";
+  font-size: 16px;
+}
+
+/* 缩小图标 */
+.icon-zoom-out::before {
+  content: "🔍";
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* 刷新图标 */
+.icon-refresh::before {
+  content: "↻";
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 下载图标 */
+.icon-download::before {
+  content: "⬇️";
+  font-size: 16px;
+}
+
 /* 添加更多自定义图标样式 */

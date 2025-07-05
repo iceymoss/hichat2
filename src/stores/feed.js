@@ -156,7 +156,8 @@ export const useFeedStore = defineStore('feed', () => {
       },
       time: '刚刚',
       content,
-      image: images && images.length > 0 ? images[0] : '',
+      image: images && images.length > 0 ? images[0] : '', // 保持向后兼容
+      images: images || [], // 支持多张图片
       likes: [],
       liked: false,
       comments: []

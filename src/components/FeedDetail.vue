@@ -9,20 +9,45 @@
           <span class="back-btn-text">返回动态列表</span>
           <div class="back-btn-ripple"></div>
         </button>
-        <img :src="selectedReactive.user.avatar" class="avatar" />
+        <img 
+          :src="selectedReactive.user.avatar" 
+          class="avatar" 
+          @mouseenter="(e) => showUserProfile(selectedReactive.user, e)"
+          @mouseleave="hideUserProfile"
+        />
         <div class="user-info">
-          <div class="name">{{ selectedReactive.user.name }}</div>
+          <div 
+            class="name"
+            @mouseenter="(e) => showUserProfile(selectedReactive.user, e)"
+            @mouseleave="hideUserProfile"
+          >{{ selectedReactive.user.name }}</div>
           <div class="time">{{ selectedReactive.time }}</div>
         </div>
       </div>
       
       <div class="feed-detail-content">
         <div class="feed-detail-text">{{ selectedReactive.content }}</div>
-        <div class="feed-detail-images" v-if="selectedReactive.images && selectedReactive.images.length">
-          <img v-for="image in selectedReactive.images" :key="image" :src="image" alt="图片" />
+        
+        <!-- 新的多图片格式 -->
+        <div class="feed-detail-images" v-if="selectedReactive.images && selectedReactive.images.length > 0">
+          <div :class="['images-grid', getImageGridClass(selectedReactive.images.length)]">
+            <div
+              v-for="(image, index) in selectedReactive.images.slice(0, 9)"
+              :key="index"
+              class="image-item"
+              @click="viewImage(index)"
+            >
+              <img :src="image" alt="动态图片" class="feed-image-item">
+              <div v-if="selectedReactive.images.length > 9 && index === 8" class="more-images-count">
+                +{{ selectedReactive.images.length - 9 }}
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="feed-detail-image" v-if="selectedReactive.image">
-          <img :src="selectedReactive.image" alt="动态图片" />
+        
+        <!-- 兼容旧的单图片格式 -->
+        <div class="feed-detail-image" v-if="selectedReactive.image && (!selectedReactive.images || selectedReactive.images.length === 0)">
+          <img :src="selectedReactive.image" alt="动态图片" @click="viewImage(0)" />
         </div>
       </div>
       
@@ -49,12 +74,18 @@
             :src="`https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}`"
             :alt="user"
             class="like-avatar"
+            @mouseenter="(e) => showUserProfile({ name: user, avatar: `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}` }, e)"
+            @mouseleave="hideUserProfile"
           />
           <span v-if="selectedReactive.likes.length > 15" class="more-likes">+{{ selectedReactive.likes.length - 15 }}</span>
         </div>
         <div class="likes-text">
           <span v-for="(user, index) in Array.from(new Set(selectedReactive.likes)).slice(0, 15)" :key="user" class="like-user">
-            {{ user }}{{ index < Math.min(14, selectedReactive.likes.length - 1) ? '、' : '' }}
+            <span 
+              class="like-user-name"
+              @mouseenter="(e) => showUserProfile({ name: user, avatar: `https://api.dicebear.com/7.x/personas/svg?seed=${encodeURIComponent(user)}` }, e)"
+              @mouseleave="hideUserProfile"
+            >{{ user }}</span>{{ index < Math.min(14, selectedReactive.likes.length - 1) ? '、' : '' }}
           </span>
           <span v-if="selectedReactive.likes.length > 15">等{{ selectedReactive.likes.length }}位好友点赞</span>
         </div>
@@ -84,6 +115,8 @@
         <CommentThread 
           :comments="selectedReactive.comments"
           :format-comment="formatComment"
+          :show-user-profile="showUserProfile"
+          :hide-user-profile="hideUserProfile"
           @reply="handleCommentReply"
           @like-comment="handleCommentLike"
           @like-reply="handleReplyLike"
@@ -93,20 +126,45 @@
       </div>
     </div>
     <div v-else class="feed-detail-empty">请选择一条动态</div>
+    
+    <!-- 图片查看器 -->
+    <ImageViewer
+      :visible="showImageViewer"
+      :images="viewerImages"
+      :initial-index="viewerInitialIndex"
+      @close="closeImageViewer"
+    />
+    
+    <!-- 用户资料卡片 -->
+    <UserProfileCard
+      :visible="profileCard.visible"
+      :user="profileCard.user"
+      :position="profileCard.position"
+      :arrow-position="profileCard.arrowPosition"
+      @close="closeProfileCard"
+      @view-profile="handleViewProfile"
+      @view-space="handleViewSpace"
+      @mouse-enter-card="handleMouseEnterCard"
+      @mouse-leave-card="handleMouseLeaveCard"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
 import CommentThread from './CommentThread.vue'
+import ImageViewer from './ImageViewer.vue'
+import UserProfileCard from './UserProfileCard.vue'
 import { useFeedStore } from '../stores/feed'
 import { useAuthStore } from '../stores/auth'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({ selected: Object })
 const emit = defineEmits(['back', 'like', 'comment'])
 
 const feedStore = useFeedStore()
 const authStore = useAuthStore()
+const router = useRouter()
 const selectedReactive = computed(() => {
   if (!props.selected) return null
   const allFeeds = [...feedStore.getFriendFeeds, ...feedStore.getCommunityFeeds]
@@ -118,6 +176,19 @@ const selectedReactive = computed(() => {
 })
 
 const newComment = ref('')
+const showImageViewer = ref(false)
+const viewerImages = ref([])
+const viewerInitialIndex = ref(0)
+
+// 用户资料卡片状态
+const profileCard = ref({
+  visible: false,
+  user: null,
+  position: { x: 0, y: 0 },
+  arrowPosition: 'top'
+})
+
+let hoverTimeout = null
 
 function handleDeleteComment(comment) {
   if (!selectedReactive.value) return
@@ -190,6 +261,107 @@ function handleDeleteReply({ comment, reply }) {
   feedStore.deleteReply(postId, comment.id, reply.id, type)
 }
 
+// 查看图片
+function viewImage(index) {
+  if (!selectedReactive.value) return
+  
+  // 收集当前动态的所有图片
+  const images = []
+  
+  // 如果有新的多图片格式
+  if (selectedReactive.value.images && selectedReactive.value.images.length > 0) {
+    images.push(...selectedReactive.value.images)
+  } 
+  // 如果只有旧的单图片格式
+  else if (selectedReactive.value.image) {
+    images.push(selectedReactive.value.image)
+  }
+  
+  if (images.length > 0) {
+    viewerImages.value = images
+    viewerInitialIndex.value = Math.max(0, Math.min(index, images.length - 1))
+    showImageViewer.value = true
+  }
+}
+
+// 关闭图片查看器
+function closeImageViewer() {
+  showImageViewer.value = false
+  viewerImages.value = []
+  viewerInitialIndex.value = 0
+}
+
+// 获取图片网格布局类名
+function getImageGridClass(count) {
+  if (count === 1) return 'grid-single'
+  if (count === 2) return 'grid-double'
+  if (count === 3) return 'grid-triple'
+  if (count === 4) return 'grid-quad'
+  return 'grid-multi'
+}
+
+// 用户资料卡片相关函数
+function showUserProfile(user, event) {
+  clearTimeout(hoverTimeout)
+  
+  // 计算位置
+  const rect = event.target.getBoundingClientRect()
+  const x = rect.left + rect.width / 2
+  const y = rect.bottom + window.scrollY
+  
+  // 检查是否靠近页面底部
+  const windowHeight = window.innerHeight
+  const cardHeight = 400 // 估算卡片高度
+  const arrowPosition = rect.bottom + cardHeight > windowHeight ? 'bottom' : 'top'
+  
+  // 构建用户资料数据
+  const profileUser = {
+    ...user,
+    description: user.description || '这个人很懒，什么都没写...',
+    isOnline: Math.random() > 0.5, // 随机在线状态
+    feedCount: Math.floor(Math.random() * 100) + 10,
+    friendCount: Math.floor(Math.random() * 500) + 50,
+    likeCount: Math.floor(Math.random() * 1000) + 100
+  }
+  
+  profileCard.value = {
+    visible: true,
+    user: profileUser,
+    position: { x, y },
+    arrowPosition
+  }
+}
+
+function hideUserProfile() {
+  hoverTimeout = setTimeout(() => {
+    profileCard.value.visible = false
+  }, 300)
+}
+
+function handleMouseEnterCard() {
+  // 清除关闭定时器
+  clearTimeout(hoverTimeout)
+}
+
+function handleMouseLeaveCard() {
+  // 延迟关闭卡片
+  hoverTimeout = setTimeout(() => {
+    profileCard.value.visible = false
+  }, 300)
+}
+
+function handleViewProfile(user) {
+  router.push(`/profile/${user.id || user.name}`)
+}
+
+function handleViewSpace(user) {
+  router.push(`/space/${user.id || user.name}`)
+}
+
+function closeProfileCard() {
+  profileCard.value.visible = false
+}
+
 
 </script>
 
@@ -200,6 +372,7 @@ function handleDeleteReply({ comment, reply }) {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e0e7ff 100%);
   padding: 24px;
   position: relative;
+  z-index: 1; /* 确保正确的层级 */
 }
 
 .feed-detail-container::before {
@@ -229,7 +402,7 @@ function handleDeleteReply({ comment, reply }) {
   border: 1px solid rgba(229, 231, 235, 0.2);
   backdrop-filter: blur(20px);
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 .feed-detail-header {
   display: flex;
@@ -243,23 +416,23 @@ function handleDeleteReply({ comment, reply }) {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
+  gap: 8px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #4a8cff 0%, #8a69ff 100%);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   box-shadow: 
-    0 4px 12px rgba(74, 140, 255, 0.25),
-    0 2px 6px rgba(138, 105, 255, 0.15),
+    0 3px 10px rgba(74, 140, 255, 0.25),
+    0 1px 4px rgba(138, 105, 255, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
-  min-width: 140px;
+  min-width: 120px;
   justify-content: center;
 }
 
@@ -277,10 +450,10 @@ function handleDeleteReply({ comment, reply }) {
 }
 
 .back-btn:hover {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-1px) scale(1.02);
   box-shadow: 
-    0 6px 20px rgba(74, 140, 255, 0.35),
-    0 4px 12px rgba(138, 105, 255, 0.25),
+    0 4px 16px rgba(74, 140, 255, 0.35),
+    0 2px 8px rgba(138, 105, 255, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   background: linear-gradient(135deg, #5a9cff 0%, #9a79ff 100%);
 }
@@ -298,9 +471,9 @@ function handleDeleteReply({ comment, reply }) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.15);
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -312,7 +485,7 @@ function handleDeleteReply({ comment, reply }) {
 }
 
 .back-btn-icon .icon {
-  font-size: 12px;
+  font-size: 11px;
   color: #ffffff;
   font-weight: bold;
 }
@@ -347,9 +520,9 @@ function handleDeleteReply({ comment, reply }) {
 .back-btn:focus {
   outline: none;
   box-shadow: 
-    0 4px 12px rgba(74, 140, 255, 0.25),
-    0 2px 6px rgba(138, 105, 255, 0.15),
-    0 0 0 3px rgba(74, 140, 255, 0.3);
+    0 3px 10px rgba(74, 140, 255, 0.25),
+    0 1px 4px rgba(138, 105, 255, 0.15),
+    0 0 0 2px rgba(74, 140, 255, 0.3);
 }
 .avatar {
   width: 52px;
@@ -360,6 +533,7 @@ function handleDeleteReply({ comment, reply }) {
     0 4px 12px rgba(0,0,0,0.08),
     0 0 0 1px rgba(74, 140, 255, 0.1);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .avatar:hover {
@@ -382,6 +556,20 @@ function handleDeleteReply({ comment, reply }) {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin: -4px -6px 2px -6px;
+}
+
+.user-info .name:hover {
+  background: linear-gradient(135deg, #4a8cff 0%, #8a69ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(74, 140, 255, 0.2);
 }
 
 .user-info .time {
@@ -407,11 +595,105 @@ function handleDeleteReply({ comment, reply }) {
   line-height: 1.7;
   margin-bottom: 16px;
 }
+/* 单图片样式 */
 .feed-detail-image img {
   max-width: 100%;
+  max-height: 500px;
   border-radius: 12px;
   object-fit: cover;
   border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.feed-detail-image img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #cbd5e1;
+}
+
+/* 多图片网格布局 */
+.feed-detail-images {
+  margin: 16px 0;
+}
+
+.images-grid {
+  display: grid;
+  gap: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.images-grid.grid-single {
+  grid-template-columns: 1fr;
+  max-width: 500px;
+}
+
+.images-grid.grid-double {
+  grid-template-columns: 1fr 1fr;
+  max-width: 500px;
+}
+
+.images-grid.grid-triple {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  max-width: 500px;
+}
+
+.images-grid.grid-triple .image-item:first-child {
+  grid-row: 1 / 3;
+}
+
+.images-grid.grid-quad {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  max-width: 500px;
+}
+
+.images-grid.grid-multi {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 500px;
+}
+
+.image-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+}
+
+.image-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 3;
+}
+
+.feed-image-item {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.image-item:hover .feed-image-item {
+  transform: scale(1.05);
+}
+
+.more-images-count {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  backdrop-filter: blur(2px);
 }
 .feed-detail-stats {
   display: flex;
@@ -442,6 +724,15 @@ function handleDeleteReply({ comment, reply }) {
   height: 32px;
   border-radius: 50%;
   border: 2px solid #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.like-avatar:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 16px rgba(74, 140, 255, 0.3);
+  border-color: rgba(74, 140, 255, 0.5);
 }
 .more-likes {
   color: #64748b;
@@ -455,6 +746,22 @@ function handleDeleteReply({ comment, reply }) {
 .like-user {
   font-weight: 600;
   color: #1f2937;
+}
+
+.like-user-name {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: -2px -4px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.like-user-name:hover {
+  color: #8a69ff;
+  background: rgba(138, 105, 255, 0.1);
+  transform: scale(1.05);
 }
 .feed-detail-actions {
   display: flex;
@@ -547,7 +854,7 @@ function handleDeleteReply({ comment, reply }) {
     0 8px 16px rgba(138, 105, 255, 0.05);
   border: 1px solid rgba(229, 231, 235, 0.2);
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 400px;
   margin: 0 auto;
 }
@@ -574,5 +881,87 @@ function handleDeleteReply({ comment, reply }) {
 :deep(.at-user) {
   color: #4a8cff;
   font-weight: 600;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .feed-detail-container {
+    padding: 16px;
+  }
+  
+  .feed-detail {
+    padding: 24px;
+  }
+  
+  .feed-detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .back-btn {
+    align-self: stretch;
+    justify-content: center;
+    min-width: 100px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  
+  .back-btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .back-btn-icon .icon {
+    font-size: 10px;
+  }
+  
+  .images-grid.grid-single {
+    max-width: 100%;
+  }
+  
+  .images-grid.grid-double {
+    max-width: 100%;
+  }
+  
+  .images-grid.grid-triple {
+    max-width: 100%;
+  }
+  
+  .images-grid.grid-quad {
+    max-width: 100%;
+  }
+  
+  .images-grid.grid-multi {
+    max-width: 100%;
+  }
+  
+  .feed-detail-stats {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .feed-detail-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .action-btn {
+    justify-content: center;
+  }
+  
+  .add-comment {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .add-comment input {
+    order: 1;
+  }
+  
+  .add-comment button {
+    order: 2;
+    align-self: stretch;
+  }
 }
 </style> 
