@@ -1,4 +1,11 @@
+/* 登录页主题色和全局变量 */
 :root {
+  --primary-gradient: linear-gradient(135deg, #4a8cff, #8a69ff);
+  --primary-color: #4a8cff;
+  --primary-color-dark: #8a69ff;
+  --background-color: #f5f6fa;
+  --button-radius: 8px;
+
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -29,6 +36,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: var(--background-color);
+  font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
 }
 
 h1 {
@@ -81,4 +90,22 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.main-bg {
+  background: var(--primary-gradient);
+}
+
+.button,
+.el-button {
+  background: var(--primary-gradient);
+  border-radius: var(--button-radius);
+  color: #fff;
+  border: none;
+  transition: background 0.3s;
+}
+
+.button:hover,
+.el-button:hover {
+  filter: brightness(1.1);
 }

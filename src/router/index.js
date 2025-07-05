@@ -56,6 +56,12 @@ const routes = [
     ]
   },
   {
+    path: '/app/notifications',
+    name: 'Notifications',
+    component: () => import('../views/NotificationsView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/login'
   }

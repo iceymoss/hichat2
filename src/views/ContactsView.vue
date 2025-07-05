@@ -296,8 +296,21 @@ const startChat = (friend) => {
 }
 
 .contacts-content {
-  flex: 1;
+  max-height: 70vh;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4a8cff #8a69ff;
+}
+.contacts-content::-webkit-scrollbar {
+  width: 6px;
+}
+.contacts-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4a8cff, #8a69ff);
+  border-radius: 4px;
+}
+.contacts-content::-webkit-scrollbar-track {
+  background: #23242a;
+  border-radius: 4px;
 }
 
 .contacts-section {

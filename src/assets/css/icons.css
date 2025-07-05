@@ -7,4 +7,34 @@
   fill: currentColor;
 }
 
+/* 点赞图标 */
+.icon-like::before {
+  content: "👍";
+  font-size: 16px;
+}
+
+.icon-liked::before {
+  content: "❤️";
+  font-size: 16px;
+}
+
+/* 评论图标 */
+.icon-comment::before {
+  content: "💬";
+  font-size: 16px;
+}
+
+/* 返回图标 */
+.icon-arrow-left::before {
+  content: "←";
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 分享图标 */
+.icon-share::before {
+  content: "📤";
+  font-size: 16px;
+}
+
 /* 添加更多自定义图标样式 */

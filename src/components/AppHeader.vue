@@ -35,14 +35,13 @@ const user = computed(() => authStore.user || { avatar: '' })
 
 <style scoped>
 .app-header {
+  background: linear-gradient(90deg, #4a8cff, #8a69ff);
+  color: #fff;
+  height: 60px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  height: 60px;
-  background-color: #2e3b3a;
-  color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .header-left, .header-right {
