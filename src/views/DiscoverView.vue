@@ -82,22 +82,31 @@ onMounted(() => {
 
 <style scoped>
 .discover-view {
-  height: 100%;
+  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .discover-container {
   display: flex;
   height: 100%;
   width: 100%;
+  min-height: 0;
+  flex: 1;
 }
 
 .feed-list-section {
   flex: 1;
+  height: 100%;
+  min-height: 0;
 }
 
 .feed-detail-section {
   flex: 1;
+  height: 100%;
+  min-height: 0;
 }
 </style>
