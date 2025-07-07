@@ -155,6 +155,163 @@
   font-size: 16px;
 }
 
+/* 消息圆圈图标 */
+.icon-message-circle::before {
+  content: "💬";
+  font-size: 16px;
+}
+
+/* 搜索图标 */
+.icon-search::before {
+  content: "🔍";
+  font-size: 16px;
+}
+
+/* 用户群组图标 */
+.icon-users::before {
+  content: "👥";
+  font-size: 16px;
+}
+
+/* 闪电图标 */
+.icon-zap::before {
+  content: "⚡";
+  font-size: 16px;
+}
+
+/* 盾牌图标 */
+.icon-shield::before {
+  content: "🛡️";
+  font-size: 16px;
+}
+
+/* 电话图标 */
+.icon-phone::before {
+  content: "📞";
+  font-size: 16px;
+}
+
+/* 视频图标 */
+.icon-video::before {
+  content: "📹";
+  font-size: 16px;
+}
+
+/* 发送图标 */
+.icon-send::before {
+  content: "📤";
+  font-size: 16px;
+}
+
+/* 大头针图标 */
+.icon-pin::before {
+  content: "📌";
+  font-size: 16px;
+}
+
+/* 实心大头针图标 */
+.icon-pin-filled::before {
+  content: "📍";
+  font-size: 16px;
+}
+
+/* 音量图标 */
+.icon-volume::before {
+  content: "🔊";
+  font-size: 16px;
+}
+
+/* 静音图标 */
+.icon-volume-off::before {
+  content: "🔇";
+  font-size: 16px;
+}
+
+/* 垃圾箱图标 */
+.icon-trash::before {
+  content: "🗑️";
+  font-size: 16px;
+}
+
+/* 表情图标 */
+.icon-emoji::before {
+  content: "😊";
+  font-size: 16px;
+}
+
+/* 文件图标 */
+.icon-file::before {
+  content: "📁";
+  font-size: 16px;
+}
+
+/* 麦克风图标 */
+.icon-mic::before {
+  content: "🎤";
+  font-size: 16px;
+}
+
+/* 更多操作图标 */
+.icon-more::before {
+  content: "⋯";
+  font-size: 16px;
+}
+
+/* X关闭图标 */
+.icon-x::before {
+  content: "✕";
+  font-size: 16px;
+}
+
+/* 向下箭头图标 */
+.icon-chevron-down::before {
+  content: "▼";
+  font-size: 16px;
+}
+
+/* 播放图标 */
+.icon-play::before {
+  content: "▶️";
+  font-size: 16px;
+}
+
+/* 暂停图标 */
+.icon-pause::before {
+  content: "⏸️";
+  font-size: 16px;
+}
+
+/* 下载图标 */
+.icon-download::before {
+  content: "⬇️";
+  font-size: 16px;
+}
+
+/* 时钟图标 */
+.icon-clock::before {
+  content: "🕐";
+  font-size: 16px;
+}
+
+/* 检查图标 */
+.icon-check::before {
+  content: "✓";
+  font-size: 16px;
+}
+
+/* 双检查图标 */
+.icon-check-double::before {
+  content: "✓✓";
+  font-size: 16px;
+}
+
+/* 已读双检查图标 */
+.icon-check-double-read::before {
+  content: "✓✓";
+  font-size: 16px;
+  color: #8b5cf6;
+}
+
 /* 左箭头图标 */
 .icon-chevron-left::before {
   content: "‹";
@@ -185,6 +342,92 @@
 /* 下载图标 */
 .icon-download::before {
   content: "⬇️";
+  font-size: 16px;
+}
+
+/* 预览和操作图标 */
+.icon-eye::before {
+  content: "👁";
+  font-size: 16px;
+}
+
+.icon-rotate::before {
+  content: "🔄";
+  font-size: 16px;
+}
+
+.icon-external-link::before {
+  content: "🔗";
+  font-size: 16px;
+}
+
+/* 文件类型图标 */
+.icon-file-pdf::before {
+  content: "📄";
+  font-size: 16px;
+  color: #ef4444;
+}
+
+.icon-file-word::before {
+  content: "📝";
+  font-size: 16px;
+  color: #2563eb;
+}
+
+.icon-file-excel::before {
+  content: "📊";
+  font-size: 16px;
+  color: #16a34a;
+}
+
+.icon-file-powerpoint::before {
+  content: "📈";
+  font-size: 16px;
+  color: #dc2626;
+}
+
+.icon-file-code::before {
+  content: "💻";
+  font-size: 16px;
+  color: #7c3aed;
+}
+
+.icon-file-text::before {
+  content: "📄";
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.icon-file-video::before {
+  content: "🎬";
+  font-size: 16px;
+  color: #dc2626;
+}
+
+.icon-file-audio::before {
+  content: "🎵";
+  font-size: 16px;
+  color: #16a34a;
+}
+
+.icon-file-archive::before {
+  content: "📦";
+  font-size: 16px;
+  color: #f59e0b;
+}
+
+.icon-archive::before {
+  content: "📦";
+  font-size: 16px;
+}
+
+.icon-music::before {
+  content: "🎵";
+  font-size: 16px;
+}
+
+.icon-warning::before {
+  content: "⚠️";
   font-size: 16px;
 }
 

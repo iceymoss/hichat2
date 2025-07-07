@@ -2,126 +2,57 @@
   <div class="main-view main-bg">
     <AppHeader />
     <div class="main-nav">
-      <div 
+      <router-link 
         v-for="tab in tabs" 
         :key="tab.key" 
-        :class="['nav-item', { active: activeTab === tab.key }]"
-        @click="activeTab = tab.key"
+        :to="tab.route"
+        :class="['nav-item', { active: $route.name === tab.routeName }]"
       >
         <i :class="['icon', tab.icon]"></i>
         <span>{{ tab.label }}</span>
-      </div>
+      </router-link>
     </div>
     <div class="main-body">
-      <template v-if="activeTab === 'feed'">
-        <div style="display:flex;height:100%;width:100%">
-          <FeedList v-model="activeFeedType" />
-          <FeedTypeList 
-            :feeds="feedData[activeFeedType]" 
-            @select="handleFeedSelect" 
-            @like="handleLike"
-            @comment="handleComment"
-            style="flex:1;" 
-            v-if="!selectedFeed" 
-          />
-          <FeedDetail 
-            :selected="selectedFeed" 
-            @back="handleFeedBack" 
-            @like="handleDetailLike"
-            @comment="handleDetailComment"
-            v-else 
-            style="flex:1;" 
-          />
-        </div>
-      </template>
-      <template v-else>
-        <div class="side-list">
-          <component :is="activeTabListComponent" @select="handleSelect" />
-        </div>
-        <div class="main-detail">
-          <component :is="activeTabDetailComponent" :selected="selectedItem" />
-        </div>
-      </template>
+      <!-- 使用router-view来渲染子路由 -->
+      <router-view />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
 import AppHeader from '../components/AppHeader.vue'
-import ConversationList from '../components/ConversationList.vue'
-import ContactsView from './ContactsView.vue'
-import FeedList from '../components/FeedList.vue'
-import FeedTypeList from '../components/FeedTypeList.vue'
-import FeedDetail from '../components/FeedDetail.vue'
-import ProfileView from './ProfileView.vue'
-import { useFeedStore } from '../stores/feed'
 
-// 先声明详情组件
-const ConversationDetail = { template: '<div style="padding:32px;color:#fff;">会话详情区（可替换为真实聊天窗口）</div>' }
-const ContactDetail = { template: '<div style="padding:32px;color:#fff;">好友详情区（可替换为好友资料/聊天）</div>' }
-const ProfileDetail = { template: '<div style="padding:32px;color:#fff;">我的详情区（可替换为我的资料）</div>' }
-
-const feedStore = useFeedStore()
-
-// 使用feed store的数据，改为computed，保证响应式和不为undefined
-const feedData = computed(() => ({
-  friend: feedStore.getFriendFeeds,
-  community: feedStore.getCommunityFeeds
-}))
-const activeFeedType = ref('friend')
-const selectedFeed = ref(null)
-
+// 导航配置
 const tabs = [
-  { key: 'chat', label: '会话', icon: 'icon-chat', list: ConversationList, detail: ConversationDetail },
-  { key: 'contacts', label: '好友', icon: 'icon-contacts', list: ContactsView, detail: ContactDetail },
-  { key: 'feed', label: '动态', icon: 'icon-feed', list: null, detail: null },
-  { key: 'profile', label: '我的', icon: 'icon-user', list: ProfileView, detail: ProfileDetail }
+  { 
+    key: 'chat', 
+    label: '会话', 
+    icon: 'icon-chat', 
+    route: '/app/chat',
+    routeName: 'Chat'
+  },
+  { 
+    key: 'contacts', 
+    label: '好友', 
+    icon: 'icon-contacts', 
+    route: '/app/contacts',
+    routeName: 'Contacts'
+  },
+  { 
+    key: 'discover', 
+    label: '动态', 
+    icon: 'icon-feed', 
+    route: '/app/discover',
+    routeName: 'Discover'
+  },
+  { 
+    key: 'profile', 
+    label: '我的', 
+    icon: 'icon-user', 
+    route: '/app/profile',
+    routeName: 'Profile'
+  }
 ]
-
-const activeTab = ref('chat')
-const selectedItem = ref(null)
-const activeTabListComponent = computed(() => {
-  const found = tabs.find(t => t.key === activeTab.value)
-  return found ? found.list : ConversationList
-})
-const activeTabDetailComponent = computed(() => {
-  const found = tabs.find(t => t.key === activeTab.value)
-  return found ? found.detail : ConversationDetail
-})
-
-function handleSelect(item) {
-  selectedItem.value = item
-}
-
-function handleFeedTypeChange(type) {
-  activeFeedType.value = type
-  selectedFeed.value = null
-}
-
-function handleFeedSelect(feed) {
-  selectedFeed.value = feed
-}
-
-function handleFeedBack() {
-  selectedFeed.value = null
-}
-
-function handleLike(feedId) {
-  feedStore.toggleLike(feedId, activeFeedType.value)
-}
-
-function handleComment(commentData) {
-  feedStore.addComment(commentData.feedId, commentData.content, activeFeedType.value)
-}
-
-function handleDetailLike(feedId) {
-  feedStore.toggleLike(feedId, activeFeedType.value)
-}
-
-function handleDetailComment(commentData) {
-  feedStore.addComment(commentData.feedId, commentData.content, activeFeedType.value)
-}
 </script>
 
 <style scoped>
@@ -150,8 +81,20 @@ function handleDetailComment(commentData) {
   display: flex;
   align-items: center;
   font-weight: 500;
+  text-decoration: none;
 }
+
+.nav-item:hover {
+  color: #4a8cff;
+}
+
 .nav-item.active {
+  color: #4a8cff;
+  font-weight: bold;
+  border-bottom: 2.5px solid #4a8cff;
+}
+
+.nav-item.router-link-active {
   color: #4a8cff;
   font-weight: bold;
   border-bottom: 2.5px solid #4a8cff;
@@ -161,30 +104,10 @@ function handleDetailComment(commentData) {
   margin-right: 6px;
 }
 .main-body {
-  flex: 1 1 0;
-  display: flex;
-  min-height: 0;
-  background: none;
-  height: 0;
-}
-.side-list {
-  width: 360px;
-  min-width: 360px;
-  max-width: 360px;
-  background: none;
-  border-right: 1px solid #23242a;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  flex: 1 0 0;
-}
-.main-detail {
   flex: 1;
-  background: none;
-  min-width: 0;
-  overflow: auto;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 </style>
