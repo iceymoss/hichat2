@@ -34,46 +34,13 @@ const selectGroup = (group) => {
 }
 </script>
 <style scoped>
-.group-list-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-}
-.search-section {
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f2f5;
-}
-.search-section input {
-  width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-}
-.empty {
-  color: #aaa;
-  text-align: center;
-  margin: 40px 0;
-}
-.group-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin: 12px 12px 0 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.group-item.active {
-  background: #e0e7ff;
-}
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-}
+.group-list-container { height: 100%; display: flex; flex-direction: column; background: #fff; }
+.search-section { padding: 16px 20px; border-bottom: 1px solid #f0f2f5; }
+.search-section input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; }
+.empty { color: #aaa; text-align: center; margin: 40px 0; }
+.group-item { display: flex; align-items: center; gap: 16px; background: #f8fafc; border-radius: 12px; padding: 12px 16px; margin: 12px 12px 0 12px; cursor: pointer; transition: background 0.2s; }
+.group-item.active { background: #e0e7ff; }
+.avatar { width: 44px; height: 44px; border-radius: 10px; }
 .info { flex: 1; }
 .name { font-size: 16px; font-weight: 600; }
 .desc { font-size: 13px; color: #666; margin-top: 2px; }

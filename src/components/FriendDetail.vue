@@ -145,14 +145,17 @@ const deleteFriend = (friendId) => { showSettings.value = false }
 
 <style scoped>
 .friend-detail-container {
-  height: 100%;
+  width: 80%;
+  min-width: 600px;
+  max-width: 900px;
+  margin: 48px auto 0 auto;
+  padding: 24px;
   background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  height: 100%;
   display: flex;
   flex-direction: column;
-  width: 80%;
-  min-height: 110vh;
-  margin: 0 auto;
-  padding: 24px;
 }
 .empty-state { flex: 1; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); height: 100%; }
 .empty-content { text-align: center; color: #64748b; }

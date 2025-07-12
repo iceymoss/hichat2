@@ -97,6 +97,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useContactsStore } from '../stores/contacts'
+import { sortFriendsByPinyin, groupFriendsByPinyin } from '../utils/sortUtils'
 
 const props = defineProps({
   selectedFriendId: {
@@ -128,35 +129,13 @@ const sortedFriends = computed(() => {
     )
   }
   
-  // 按备注或名称排序
-  return friends.sort((a, b) => {
-    const nameA = (a.remark || a.name).toLowerCase()
-    const nameB = (b.remark || b.name).toLowerCase()
-    return nameA.localeCompare(nameB)
-  })
+  // 按备注或名称拼音排序
+  return sortFriendsByPinyin(friends)
 })
 
 // 按字母分组的好友
 const groupedFriends = computed(() => {
-  const groups = {}
-  
-  sortedFriends.value.forEach(friend => {
-    const displayName = friend.remark || friend.name
-    const firstLetter = displayName.charAt(0).toUpperCase()
-    
-    if (!groups[firstLetter]) {
-      groups[firstLetter] = []
-    }
-    groups[firstLetter].push(friend)
-  })
-  
-  // 转换为数组并按字母排序
-  return Object.keys(groups)
-    .sort()
-    .map(letter => ({
-      letter,
-      friends: groups[letter]
-    }))
+  return groupFriendsByPinyin(sortedFriends.value)
 })
 
 // 方法
