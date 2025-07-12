@@ -431,4 +431,29 @@
   font-size: 16px;
 }
 
+/* 设置图标 */
+.icon-settings::before {
+  content: "⚙️";
+  font-size: 16px;
+}
+
+/* 标签图标 */
+.icon-tag::before {
+  content: "🏷️";
+  font-size: 16px;
+}
+
+/* 右箭头图标 */
+.icon-arrow-right::before {
+  content: "→";
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 朋友圈图标 */
+.icon-feed::before {
+  content: "📱";
+  font-size: 16px;
+}
+
 /* 添加更多自定义图标样式 */
