@@ -11,7 +11,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '前端开发',
       status: 'online',
       tags: ['同事', '前端'],
-      lastActive: '刚刚'
+      lastActive: '刚刚',
+      gender: 'female',
+      email: 'xiaoli@example.com',
+      phone: '13800000001',
+      signature: '热爱前端，喜欢React和Vue'
     },
     {
       id: 1002,
@@ -20,7 +24,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '产品经理',
       status: 'away',
       tags: ['领导'],
-      lastActive: '1小时前'
+      lastActive: '1小时前',
+      gender: 'male',
+      email: 'wang@example.com',
+      phone: '13800000002',
+      signature: '产品为王，体验至上'
     },
     {
       id: 1003,
@@ -29,7 +37,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '后端开发',
       status: 'online',
       tags: ['同事', 'Go'],
-      lastActive: '刚刚'
+      lastActive: '刚刚',
+      gender: 'male',
+      email: 'zhang@example.com',
+      phone: '13800000003',
+      signature: '专注Go开发，热爱技术分享'
     },
     {
       id: 1004,
@@ -38,7 +50,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: 'UI设计师',
       status: 'offline',
       tags: ['设计'],
-      lastActive: '2天前'
+      lastActive: '2天前',
+      gender: 'female',
+      email: 'chen@example.com',
+      phone: '13800000004',
+      signature: '设计让生活更美好'
     },
     {
       id: 101,
@@ -47,7 +63,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '后端开发',
       tags: ['Go', '后端'],
       status: 'online',
-      lastActive: '1分钟前'
+      lastActive: '1分钟前',
+      gender: 'male',
+      email: 'xiaoming@example.com',
+      phone: '13800000005',
+      signature: '代码改变世界'
     },
     {
       id: 102,
@@ -56,7 +76,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '产品经理',
       tags: ['产品'],
       status: 'away',
-      lastActive: '5分钟前'
+      lastActive: '5分钟前',
+      gender: 'female',
+      email: 'xiaohong@example.com',
+      phone: '13800000006',
+      signature: '用心做产品'
     },
     {
       id: 103,
@@ -65,7 +89,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '测试工程师',
       tags: ['测试'],
       status: 'offline',
-      lastActive: '10分钟前'
+      lastActive: '10分钟前',
+      gender: 'male',
+      email: 'gang@example.com',
+      phone: '13800000007',
+      signature: '测试让产品更可靠'
     },
     {
       id: 104,
@@ -74,7 +102,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: 'UI设计',
       tags: ['设计'],
       status: 'online',
-      lastActive: '2分钟前'
+      lastActive: '2分钟前',
+      gender: 'female',
+      email: 'mei@example.com',
+      phone: '13800000008',
+      signature: '美是设计的灵魂'
     },
     {
       id: 105,
@@ -83,7 +115,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '前端开发',
       tags: ['Vue', '前端'],
       status: 'away',
-      lastActive: '8分钟前'
+      lastActive: '8分钟前',
+      gender: 'male',
+      email: 'qiang@example.com',
+      phone: '13800000009',
+      signature: '前端路上，一起成长'
     },
     {
       id: 106,
@@ -92,7 +128,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '运营',
       tags: ['运营'],
       status: 'offline',
-      lastActive: '20分钟前'
+      lastActive: '20分钟前',
+      gender: 'female',
+      email: 'fang@example.com',
+      phone: '13800000010',
+      signature: '用心服务每一位用户'
     },
     {
       id: 107,
@@ -101,7 +141,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '后端开发',
       tags: ['Go'],
       status: 'online',
-      lastActive: '3分钟前'
+      lastActive: '3分钟前',
+      gender: 'male',
+      email: 'jun@example.com',
+      phone: '13800000011',
+      signature: '后端技术爱好者'
     },
     {
       id: 108,
@@ -110,7 +154,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '产品助理',
       tags: ['产品'],
       status: 'away',
-      lastActive: '12分钟前'
+      lastActive: '12分钟前',
+      gender: 'female',
+      email: 'xue@example.com',
+      phone: '13800000012',
+      signature: '助理也有大梦想'
     },
     {
       id: 109,
@@ -119,7 +167,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '测试',
       tags: ['测试'],
       status: 'offline',
-      lastActive: '30分钟前'
+      lastActive: '30分钟前',
+      gender: 'male',
+      email: 'lin@example.com',
+      phone: '13800000013',
+      signature: '细致入微，追求极致'
     },
     {
       id: 110,
@@ -128,7 +180,11 @@ export const useContactsStore = defineStore('contacts', () => {
       remark: '前端开发',
       tags: ['Vue'],
       status: 'online',
-      lastActive: '刚刚'
+      lastActive: '刚刚',
+      gender: 'male',
+      email: 'tian@example.com',
+      phone: '13800000014',
+      signature: '热爱前端，乐于分享'
     }
   ])
   

@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useConversationStore } from '../stores/conversation'
 import ConversationList from '../components/ConversationList.vue'
 import ChatPanel from '../components/ChatPanel.vue'
@@ -137,6 +137,19 @@ function toggleMute(conversationId) {
 onMounted(() => {
   // 初始化会话数据
   conversationStore.initializeConversations()
+  
+  // 检查是否有预设的活跃会话（从好友详情页跳转过来）
+  const activeConversation = conversationStore.activeConversation
+  if (activeConversation) {
+    activeConversationId.value = activeConversation.id
+  }
+})
+
+// 监听会话状态变化
+watch(() => conversationStore.activeConversation, (newConversation) => {
+  if (newConversation) {
+    activeConversationId.value = newConversation.id
+  }
 })
 </script>
 
