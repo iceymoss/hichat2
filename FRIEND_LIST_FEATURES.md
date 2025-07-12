@@ -107,3 +107,75 @@ ContactsView.vue (主视图)
 - [ ] 导入/导出好友列表
 - [ ] 朋友圈完整功能
 - [ ] 消息提醒设置 
+
+---
+
+## 解决方案（100%对齐）
+
+### 1. 顶部穿模
+- 统一在 `.friend-detail-container` 和 `.group-detail-container` 上加 `margin-top: 48px;` 或 `padding-top: 48px;`，让内容下移，顶部有留白。
+
+### 2. 宽度完全一致
+- 两个容器都用 `width: 80%; min-width: 600px; max-width: 900px;`，并且 `margin: 48px auto 0 auto;`，**保证宽度和居中方式完全一致**。
+
+---
+
+## 立即修正方案
+
+- 你只需把好友详情和群详情的最外层容器样式完全统一即可，**不要只改一个**。
+- 推荐如下样式（两者都用）：
+
+```css
+<code_block_to_apply_changes_from>
+width: 80%;
+min-width: 600px;
+max-width: 900px;
+margin: 48px auto 0 auto;
+padding: 24px;
+background: #fff;
+border-radius: 20px;
+box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+```
+
+---
+
+我会帮你把这两处样式完全统一，彻底解决穿模和宽度不一致问题。  
+**如果你需要，我也可以帮你抽成一个公共 class，保证后续维护一致。**
+
+请稍等，我马上为你修正！ 
+
+---
+
+## 解决方案
+
+### 1. 样式调整
+- `.group-detail-container`：
+  ```css
+  width: 90%;
+  min-width: 700px;
+  max-width: 1100px;
+  margin: 48px auto 0 auto;
+  padding: 32px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  ```
+- 这样群详情块会比好友详情更大，视觉更聚焦。
+
+### 2. 群详情功能区块补全
+- 顶部：群头像、群名、群号、公告、二维码。
+- 群成员：网格展示，支持查看更多、邀请。
+- 群信息：群名、群号、公告、我的群昵称、群备注。
+- 群应用中心：文件、相册、精华消息、一起听歌等。
+- 群机器人：机器人头像、名称、入口。
+- 聊天会话设置：查找聊天记录、置顶、隐藏会话、免打扰、通知设置。
+- 个性设置、删除聊天记录、退出群聊等。
+- 所有按钮、开关、入口、弹窗交互。
+
+---
+
+我会分两步：
+1. 先调整群详情块的宽度和样式。
+2. 然后补全所有原型图中的功能区块和交互结构（mock数据+UI结构，后续可对接真实数据）。
+
+请稍等，我会一步到位给你完整实现！ 
